@@ -19,10 +19,7 @@ env/
 .env.*
 
 # 🧪 Allure
-allure-results/
-allure-report/
-.history/
-allure-maven/
+
 
 # 🧪 Целевые тестовые папки (например, Java-проекты)
 /target/
