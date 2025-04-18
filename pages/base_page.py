@@ -1,13 +1,11 @@
 import allure
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
 from seletools.actions import drag_and_drop
 
 from selenium.common.exceptions import ElementClickInterceptedException
-from time import sleep
 
 class BasePage:
     def __init__(self, driver):
@@ -32,7 +30,7 @@ class BasePage:
         self.driver.get(page_url)
 
     @allure.step("Ожидание видимости элемента")
-    def wait_for_element(self, locator, timeout=10):
+    def wait_for_element(self, locator, timeout=15):
         return WebDriverWait(self.driver, timeout).until(
             EC.visibility_of_element_located(locator))
 
@@ -41,16 +39,17 @@ class BasePage:
         return WebDriverWait(self.driver, timeout).until(
             EC.element_to_be_clickable(locator))
 
+
     @allure.step("Ожидание, пока элемент станет невидимым")
     def wait_for_invisibility(self, locator, timeout=10):
         WebDriverWait(self.driver, timeout).until(
             EC.invisibility_of_element_located(locator))
 
     @allure.step("Ожидание исчезновения модального оверлея")
-    def wait_modal_overlay_disappears(self, timeout=15):
+    def wait_modal_overlay_disappears(self, overlay_locator, timeout=10):
         try:
             WebDriverWait(self.driver, timeout).until(
-                EC.invisibility_of_element_located((By.CLASS_NAME, "Modal_modal_overlay__x2ZCr"))
+                EC.invisibility_of_element_located(overlay_locator)
             )
         except:
             pass
@@ -122,25 +121,49 @@ class BasePage:
         element.click()
 
     @allure.step("Клик по элементу с повторными попытками")
-    def click_to_element_few_tries(self, locator, attempts=3):
+    def click_to_element_few_tries(self,
+                                   locator,
+                                   attempts: int = 4,
+                                   timeout: int = 4,
+                                   overlay_locator = None):
         for attempt in range(attempts):
             try:
-                self.driver.find_element(*locator).click()
-                break
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.element_to_be_clickable(locator)
+                )
+                element.click()
+                return
             except ElementClickInterceptedException:
-                self.wait_modal_overlay_disappears()
-                sleep(3)
+                if overlay_locator:
+                    self.wait_modal_overlay_disappears(overlay_locator, timeout)
+                else:
+                    WebDriverWait(self.driver, timeout).until(
+                        EC.element_to_be_clickable(locator)
+                    )
+            except Exception as e:
+                if attempt == attempts - 1:
+                    raise Exception(f"Не удалось кликнуть по элементу {locator} после {attempts} попыток") from e
+
 
     @allure.step("Скролл до элемента")
     def scroll_to_element(self, locator, timeout=15):
-        element = self.wait_for_element(locator, timeout)
+        element = self.wait_for_element_clickable(locator, timeout)
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
 
     @allure.step("Скролл и безопасный клик")
-    def scroll_and_click(self, locator):
+    def scroll_and_click(self, locator, overlay_locator=None):
         self.scroll_to_element(locator)
-        self.wait_modal_overlay_disappears()
-        self.click_to_element_few_tries(locator)
+        if overlay_locator:
+            self.wait_modal_overlay_disappears(overlay_locator)
+        self.click_to_element_few_tries(
+            locator,
+            overlay_locator=overlay_locator
+        )
+
+    @allure.step("Клик по элементу с помощью JavaScript")
+    def javascript_click(self, locator, timeout=10):
+        element = self.wait_for_element(locator, timeout)  # Убедиться, что элемент есть в DOM
+        self.driver.execute_script("arguments[0].click();", element)
 
 
 
@@ -148,3 +171,6 @@ class BasePage:
     @allure.step("Перетащить элемент через seletools")
     def drag_and_drop_with_seletools(self, source_element, target_element):
         drag_and_drop(self.driver, source_element, target_element)
+
+
+

@@ -1,6 +1,6 @@
 import allure
 from pages.main_order_page import MainPage
-from helpers.urls import PageUrls
+from pages.order_feed_page import OrderFeed
 from helpers.data import TextData
 
 
@@ -11,23 +11,26 @@ class TestMainFunctionality:
         with allure.step("Открыть главную страницу"):
             main_page.open_main_page()
         with allure.step("Перейти в раздел 'Лента заказов'"): #Так как сразу открывается стр с конструктором
-            main_page.scroll_and_click_order_feed()
+            main_page.scroll_and_click_order_feed_js()
         with allure.step("Кликнуть по ссылке 'Конструктор'"):
-            main_page.scroll_and_click_constructor_link()
+            main_page.scroll_and_click_constructor_link_js()
 
         with allure.step("Проверить, что произошёл переход на главную страницу"):
-            assert driver.current_url == PageUrls.MAIN_PAGE
+            assert main_page.is_current_url_main_page()
 
     @allure.title('Проверка перехода по клику на "Лента заказов"')
     def test_click_on_order_feed_navigates_to_order_feed_page(self, driver):
         main_page = MainPage(driver)
+        feed_page = OrderFeed(driver)
         with allure.step("Открыть главную страницу"):
             main_page.open_main_page()
+
+            main_page.wait_order_link_clickable()
         with allure.step("Кликнуть по ссылке 'Лента заказов'"):
-            main_page.scroll_and_click_order_feed()
+            main_page.scroll_and_click_order_feed_js()
 
         with allure.step("Проверить, что произошёл переход на страницу ленты заказов"):
-            assert driver.current_url == PageUrls.FEED_PAGE
+            assert feed_page.is_current_url_feed_page()
 
 
     @allure.title('Проверка появления всплывающего окна с деталями ингредиента после клика по ингредиенту')
@@ -36,7 +39,7 @@ class TestMainFunctionality:
         with allure.step("Открыть главную страницу"):
             main_page.open_main_page()
         with allure.step("Кликнуть по ингредиенту и дождаться модального окна"):
-            main_page.scroll_and_click_ingredient()
+            main_page.scroll_and_click_ingredient_js()
             main_page.wait_for_ingredient_modal()
 
         with allure.step("Проверить, что заголовок модального окна соответствует ожидаемому"):
@@ -50,7 +53,7 @@ class TestMainFunctionality:
         with allure.step("Открыть главную страницу"):
             main_page.open_main_page()
         with allure.step("Открыть окно с деталями ингредиента"):
-            main_page.scroll_and_click_ingredient()
+            main_page.scroll_and_click_ingredient_js()
             main_page.wait_for_ingredient_modal()
         with allure.step("Закрыть модалку по крестику"):
             main_page.click_close_ingredient_modal()

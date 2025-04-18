@@ -2,6 +2,8 @@ import allure
 
 from helpers.urls import PageUrls
 from locators.order_feed_locators import OrderFeedLocators
+from locators.common_locators import CommonLocators
+
 
 from pages.base_page import BasePage
 
@@ -11,12 +13,16 @@ class OrderFeed(BasePage):
 
     @allure.step('Открытие страницы "Лента заказов"')
     def open_feed_page(self):
-        self.open_page(PageUrls.LOGIN_PAGE)
+        self.open_page(PageUrls.FEED_PAGE)
 
+    def modal_overlay_disappears(self, timeout: int = 15):
+        self.wait_modal_overlay_disappears(CommonLocators.MODAL_OVERLAY, timeout)
 
     @allure.step('Нажать на заказ')
     def click_on_order(self):
-        self.scroll_and_click(OrderFeedLocators.ORDER_LINK)
+        self.scroll_and_click(OrderFeedLocators.ORDER_LINK,
+            overlay_locator=CommonLocators.MODAL_OVERLAY
+        )
 
     @allure.step("Ожидание появления модального окна с деталями заказа")
     def wait_for_order_details_modal(self, timeout=10):
@@ -46,3 +52,11 @@ class OrderFeed(BasePage):
     @allure.step("Получить список номеров заказов в разделе 'В работе'")
     def get_orders_in_progress(self):
         return self.get_text_on_element(OrderFeedLocators.ORDER_IN_WORK_NUMBER)
+
+    @allure.step("Проверка, что текущий url - страница ленты заказов")
+    def is_current_url_feed_page(self):
+        return self.is_current_url(PageUrls.FEED_PAGE)
+
+    @allure.step("Дождаться появлния заголовка на странице Лента заказов")
+    def wait_for_feed_header(self):
+        return self.wait_for_element(OrderFeedLocators.FEED_HEADER)

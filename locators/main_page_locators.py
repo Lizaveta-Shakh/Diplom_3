@@ -12,8 +12,10 @@ class MainPageLocators: #+Конструктор
     ORDER_NUMBER_TITLE = (By.XPATH, '//h2[contains(@class, "Modal_modal__title") and contains(@class, "text_type_digits-large")]') #Номер заказа заголовок
     BURGER_CONSTRUCTOR_ZONE = (By.XPATH, '//section[contains(@class, "BurgerConstructor_basket")]') # Зона конструктор
     SPICY_X_INGREDIENT = (By.XPATH, '//p[text()="Соус Spicy-X"]/ancestor::a')
-
-
+    ORDER_FEED_TEXT = (
+        By.XPATH,
+        "//a[@href='/feed']//p[text()='Лента Заказов']"
+    )
     # Cчетчик ингредиента
     @staticmethod
     def ingredient_counter_locator(name: str):

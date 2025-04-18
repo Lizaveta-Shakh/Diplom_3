@@ -10,3 +10,4 @@ class OrderFeedLocators:
                                              '"OrderFeed_orderListReady")]/li[contains(@class, '
                                              '"text_type_digits-default")]')
     ORDER_IN_PROGRESS = (By.XPATH, '//ul[contains(@class, "OrderFeed_orderListReady")]/li')
+    FEED_HEADER = (By.XPATH, "//h1[text()='Лента заказов']")

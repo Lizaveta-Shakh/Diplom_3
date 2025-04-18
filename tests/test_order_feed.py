@@ -11,7 +11,8 @@ class TestOrderFeed:
 
         with allure.step("Ожидание загрузки главной страницы и переход в 'Ленту заказов'"):
             main_page.open_main_page()
-            main_page.scroll_and_click_order_feed()
+            main_page.wait_order_link_clickable()
+            main_page.scroll_and_click_order_feed_js()
 
         with allure.step("Клик на заказ в ленте заказов"):
             feed_page.click_on_order()
